@@ -1,22 +1,16 @@
-table.insert(Assets, Asset("SHADER", "shaders/CESBloom.ksh"))
-table.insert(Assets, Asset("SHADER", "shaders/postprocess_CESBloom.ksh"))
+_G.CESAPI.GenerateMaskingShaders("bloom", Assets)
 
 AddModShadersInit(function()
-    _G.SamplerEffects["CESBloomSampler"] = _G.PostProcessor:AddSamplerEffect(_G.resolvefilepath("shaders/postprocess_CESBloom.ksh"), _G.SamplerSizes.Relative, 1, 1, _G.SamplerColourMode.RGB, _G.SamplerEffectBase.BloomSampler)
-    _G.PostProcessor:AddSampler(_G.SamplerEffects["CESBloomSampler"], _G.SamplerEffectBase.PostProcessSampler)
-    _G.PostProcessor:SetEffectUniformVariables(_G.SamplerEffects["CESBloomSampler"], _G.UniformVariables.SAMPLER_PARAMS)
-    _G.PostProcessor:SetSamplerEffectFilter(_G.SamplerEffects["CESBloomSampler"], _G.FILTER_MODE.LINEAR, _G.FILTER_MODE.LINEAR, _G.MIP_FILTER_MODE.NONE)
+    _G.SamplerEffects.CESBloomBlurH = _G.PostProcessor:AddSamplerEffect("shaders/blurh.ksh", _G.SamplerSizes.Relative, 0.25, 0.25, _G.SamplerColourMode.RGB, _G.SamplerEffectBase.Shader, _G.SamplerEffects["pp_bloom_mask"])
+    _G.PostProcessor:SetEffectUniformVariables(_G.SamplerEffects.CESBloomBlurH, _G.UniformVariables.SAMPLER_PARAMS)
 
-    _G.SamplerEffects.CESBlurH = _G.PostProcessor:AddSamplerEffect("shaders/blurh.ksh", _G.SamplerSizes.Relative, 0.25, 0.25, _G.SamplerColourMode.RGB, _G.SamplerEffectBase.Shader, _G.SamplerEffects["CESBloomSampler"])
-    _G.PostProcessor:SetEffectUniformVariables(_G.SamplerEffects.CESBlurH, _G.UniformVariables.SAMPLER_PARAMS)
+    _G.SamplerEffects.CESBloomBlurV = _G.PostProcessor:AddSamplerEffect("shaders/blurv.ksh", _G.SamplerSizes.Relative, 0.25, 0.25, _G.SamplerColourMode.RGB, _G.SamplerEffectBase.Shader, _G.SamplerEffects.CESBloomBlurH)
+    _G.PostProcessor:SetEffectUniformVariables(_G.SamplerEffects.CESBloomBlurV, _G.UniformVariables.SAMPLER_PARAMS)
+    
+    _G.PostProcessor:SetSamplerEffectFilter(_G.SamplerEffects.CESBloomBlurV, _G.FILTER_MODE.LINEAR, _G.FILTER_MODE.LINEAR, _G.MIP_FILTER_MODE.NONE)
 
-    _G.SamplerEffects.CESBlurV = _G.PostProcessor:AddSamplerEffect("shaders/blurv.ksh", _G.SamplerSizes.Relative, 0.25, 0.25, _G.SamplerColourMode.RGB, _G.SamplerEffectBase.Shader, _G.SamplerEffects.CESBlurH)
-    _G.PostProcessor:SetEffectUniformVariables(_G.SamplerEffects.CESBlurV, _G.UniformVariables.SAMPLER_PARAMS)
-
-    _G.PostProcessor:SetSamplerEffectFilter(_G.SamplerEffects.CESBlurV, _G.FILTER_MODE.LINEAR, _G.FILTER_MODE.LINEAR, _G.MIP_FILTER_MODE.NONE)
-
-    _G.PostProcessorEffects.CESBloom = _G.PostProcessor:AddPostProcessEffect("shaders/postprocess_bloom.ksh")
-    _G.PostProcessor:AddSampler(_G.PostProcessorEffects.CESBloom, _G.SamplerEffectBase.Shader, _G.SamplerEffects.CESBlurV)
+    _G.PostProcessorEffects.CESBloom = _G.PostProcessor:AddPostProcessEffect(_G.resolvefilepath("shaders/CESbloom.ksh"))
+    _G.PostProcessor:AddSampler(_G.PostProcessorEffects.CESBloom, _G.SamplerEffectBase.Shader, _G.SamplerEffects.CESBloomBlurV)
 end)
 
 AddModShadersSortAndEnable(function()

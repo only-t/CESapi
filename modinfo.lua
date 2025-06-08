@@ -6,7 +6,7 @@ CESapi allows you to create custom uniform variables and samplers and pass them 
 This API is still in BETA so some bugs may be showing!
 ]]
 author = "LukaS"
-version = "0.1.0"
+version = "0.5.0"
 forumthread = ""
 icon_atlas = "icon.xml"
 icon = "icon.tex"
