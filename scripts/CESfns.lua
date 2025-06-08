@@ -91,6 +91,7 @@ _G.CESAPI.SetDefaultBloomMask = function(animstate)
     animstate:SetBloomEffectHandle(_G.resolvefilepath("unsafedata/bloom_mask.ksh"), true)
 end
 
-_G.CESAPI.SetCustomEffectMask = function(animstate, path)
+_G.CESAPI.SetCustomEffect = function(animstate, name)
+    local path = _G.resolvefilepath("unsafedata/"..name.."_mask.ksh")
     animstate:SetBloomEffectHandle(path, true)
 end
