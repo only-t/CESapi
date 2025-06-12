@@ -13,5 +13,17 @@ _G.CESAPI = {
         --     modname = "DST",
         --     color = { 0.01, 0.01, 0.01 }
         -- }
+    },
+
+    SETTINGS = {
+        NAME = "CESapi",
+        TOOLTIP = "Modify CESapi settings",
+        OPTIONS = {
+            SHADERS = {
+                NAME = "Shaders",
+                OPTIONS_STR = "CESapi_shaders",
+                TOOLTIP = "Enhance your starving experience with shaders!"
+            }
+        }
     }
 }

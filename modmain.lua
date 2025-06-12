@@ -57,7 +57,7 @@ _G.CreateEntity = function(name, ...)
             local animstate_mt_index = _G.getmetatable(animstate).__index
             local old_SetBloomEffectHandle = animstate_mt_index.SetBloomEffectHandle
             animstate_mt_index.SetBloomEffectHandle = function(self, path, modded, ...) -- Changed for the games use, should not be used by mods
-                if modded then                                                          -- Use _G.CESAPI.SetDefaultBloomEffect(inst) for the default bloom effect
+                if modded then                                                          -- Use CESAPI.SetDefaultBloomEffect(animstate) for the default bloom effect
                     old_SetBloomEffectHandle(self, path, ...)
                 else
                     _G.CESAPI.SetDefaultBloomMask(self)
@@ -73,18 +73,9 @@ _G.CreateEntity = function(name, ...)
     return ent
 end
 
-local bloom_enabled = false
-AddModShadersInit(function()
-    local pp_mt_index = _G.getmetatable(_G.PostProcessor).__index
-    local old_SetBloomEnabled = pp_mt_index.SetBloomEnabled
-    pp_mt_index.SetBloomEnabled = function(self, enabled, ...)
-        old_SetBloomEnabled(self, enabled, ...)
-
-        bloom_enabled = enabled
-        self:EnablePostProcessEffect(_G.PostProcessorEffects.Bloom, false)
-        self:EnablePostProcessEffect(_G.PostProcessorEffects.CESBloom, enabled)
-    end
-end)
+modimport("scripts/CESconstants")
+modimport("scripts/CESfns")
+modimport("scripts/CESbloom")
 
 local CESapiSettingsTab = require("widgets/cesapisettingstab")
 local OptionsScreen = require("screens/redux/optionsscreen")
@@ -99,7 +90,7 @@ OptionsScreen._BuildMenu = function(self, subscreener, ...)
         menu.items[i]:SetPosition(pos)
     end
 
-	local cesapi_button = subscreener:MenuButton("CESapi", "cesapi", "Modify CESapi settings", self.tooltip)
+	local cesapi_button = subscreener:MenuButton(_G.CESAPI.SETTINGS.NAME, "cesapi", _G.CESAPI.SETTINGS.TOOLTIP, self.tooltip)
     menu:AddCustomItem(cesapi_button)
     local pos = _G.Vector3(0, 0, 0)
     pos.y = pos.y + menu.offset * (#menu.items - 3) -- Move CESapi down into position
@@ -108,6 +99,32 @@ OptionsScreen._BuildMenu = function(self, subscreener, ...)
     return menu
 end
 
-modimport("scripts/CESconstants")
-modimport("scripts/CESfns")
-modimport("scripts/CESbloom")
+local function EnabledOptionsIndex(enabled)
+    return enabled and 2 or 1
+end
+
+if _G.Profile:GetValue(_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR) == nil then
+    _G.Profile:SetValue(_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR, true) -- true is the default value
+end
+
+local old_OptionsScreen_DoInit = OptionsScreen.DoInit
+OptionsScreen.DoInit = function(self, ...)
+    self.options[_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR] = _G.Profile:GetValue(_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR)
+    self.working[_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR] = _G.Profile:GetValue(_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR)
+
+    old_OptionsScreen_DoInit(self, ...)
+end
+
+local old_OptionsScreen_Apply = OptionsScreen.Apply
+OptionsScreen.Apply = function(self, ...)
+    _G.Profile:SetValue(_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR, self.working[_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR])
+
+    old_OptionsScreen_Apply(self, ...)
+end
+
+local old_OptionsScreen_InitializeSpinners = OptionsScreen.InitializeSpinners
+OptionsScreen.InitializeSpinners = function(self, ...)
+    self.subscreener.sub_screens["cesapi"].shadersSpinner:SetSelectedIndex(EnabledOptionsIndex(self.working[_G.CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR]))
+
+    old_OptionsScreen_InitializeSpinners(self, ...)
+end

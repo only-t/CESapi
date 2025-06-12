@@ -72,7 +72,7 @@ end
 
 local enableDisableOptions = {
     { text = STRINGS.UI.OPTIONS.DISABLED, data = false },
-    { text = STRINGS.UI.OPTIONS.ENABLED, data = true }
+    { text = STRINGS.UI.OPTIONS.ENABLED,  data = true  }
 }
 
 local CESapiSettingsTab = Class(Widget, function(self, owner)
@@ -82,12 +82,15 @@ local CESapiSettingsTab = Class(Widget, function(self, owner)
     self.grid_graphics = self:AddChild(Grid())
     self.grid_graphics:SetPosition(-90, 184, 0)
 
-    self.enableSpinner = CreateTextSpinner("Enable", enableDisableOptions, "Enable CESapi shaders")
-    self.enableSpinner.OnChanged = self.UpdateMenu
-    self.enableSpinner:Enable()
+    self.shadersSpinner = CreateTextSpinner(_G.CESAPI.SETTINGS.OPTIONS.SHADERS.NAME, enableDisableOptions, _G.CESAPI.SETTINGS.OPTIONS.SHADERS.TOOLTIP)
+    self.shadersSpinner.OnChanged = function(_, data)
+		self.owner.working[CESAPI.SETTINGS.OPTIONS.SHADERS.OPTIONS_STR] = data
+		self.owner:UpdateMenu()
+	end
+    self.shadersSpinner:Enable()
 
 	self.left_spinners_graphics = {}
-    table.insert(self.left_spinners_graphics, self.enableSpinner)
+    table.insert(self.left_spinners_graphics, self.shadersSpinner)
 
 	self.grid_graphics:UseNaturalLayout()
 	self.grid_graphics:InitSize(2, math.max(#self.left_spinners_graphics, 0), 440, 40)
