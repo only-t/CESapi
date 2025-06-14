@@ -60,7 +60,7 @@ _G.CreateEntity = function(name, ...)
                 if modded then                                                          -- Use CESAPI.SetDefaultBloomEffect(animstate) for the default bloom effect
                     old_SetBloomEffectHandle(self, path, ...)
                 else
-                    _G.CESAPI.SetDefaultBloomMask(self)
+                    _G.CESAPI.SetDefaultBloomEffect(self)
                 end
             end
 

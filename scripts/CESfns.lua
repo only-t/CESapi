@@ -87,11 +87,19 @@ _G.CESAPI.GenerateMaskingShaders = function(shadername, assettable)
     print("    Mask: ("..tostring(color_index[1])..", "..tostring(color_index[2])..", "..tostring(color_index[3])..")\n")
 end
 
-_G.CESAPI.SetDefaultBloomMask = function(animstate)
+_G.CESAPI.SetDefaultBloomEffect = function(animstate)
     animstate:SetBloomEffectHandle(_G.resolvefilepath("unsafedata/bloom_mask.ksh"), true)
 end
 
 _G.CESAPI.SetCustomEffect = function(animstate, name)
     local path = _G.resolvefilepath("unsafedata/"..name.."_mask.ksh")
     animstate:SetBloomEffectHandle(path, true)
+end
+
+_G.CESAPI.ClearCustomEffect = function(animstate)
+    animstate:ClearBloomEffectHandle()
+end
+
+_G.CESAPI.ClearDefaultBloomEffect = function(animstate)
+    animstate:ClearBloomEffectHandle()
 end
